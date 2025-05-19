@@ -1,95 +1,337 @@
-# Bhagavad Gita Q&A Assistant
+# 🕉️ Bhagavad Gita Q&A Assistant
 
-This project implements a Retrieval-Augmented Generation (RAG) system that can answer questions about the Bhagavad Gita. The system parses the PDF of the Bhagavad Gita, chunks the content, stores it locally with embeddings, and uses Google's Gemini 2.0 Flash LLM to provide detailed answers based on the text.
+![New Image](./static/chat_bg.png)
+Explore the sacred wisdom of the Bhagavad Gita through AI-powered conversations
 
-## Features
 
-- **PDF Processing**: Extracts text from the Bhagavad Gita PDF and chunks it for efficient retrieval
-- **Local Storage**: Stores text chunks and embeddings locally (no external vector database required)
-- **Dual Interface**: 
-  - Command line interface for quick questions
-  - Web interface using Flask for a more user-friendly experience
-- **Powerful AI**: Uses Google's Gemini 2.0 Flash LLM for high-quality, contextual answers
-- **Source References**: Provides answers with context from the relevant parts of the text
-- **Explain More Feature**: Request more detailed explanations with a single click or command
+## 📋 Table of Contents
 
-## Setup Instructions
+- [Overview](#-overview)
+- [Features](#-features)
+- [Quick Start](#-quick-start)
+- [Setup Instructions](#-setup-instructions)
+- [Usage](#-usage)
+- [Key Features Explained](#key-features-explained)
+- [Screenshots](#-screenshots)
+- [Example Questions](#-example-questions)
+- [Project Structure](#-project-structure)
+- [How It Works](#️-how-it-works)
+- [Advanced Usage](#️-advanced-usage)
+- [Contributing](#-contributing)
+- [Support](#-support)
+- [About the Bhagavad Gita](#-about-the-bhagavad-gita)
+- [Acknowledgments](#-acknowledgments)
+- [License](#-license)
+
+## 📜 Overview
+
+This project implements a sophisticated Retrieval-Augmented Generation (RAG) system that provides intelligent answers to questions about the Bhagavad Gita. By combining the power of Google's Gemini AI with a carefully engineered information retrieval system, it delivers accurate, contextually relevant responses drawn directly from the sacred text.
+
+The system parses the PDF of the Bhagavad Gita, intelligently divides the content into meaningful chunks, generates semantic embeddings, and uses advanced retrieval techniques to find the most relevant passages for any query. This approach ensures that answers are grounded in the actual text rather than fabricated.
+
+## ✨ Features
+
+- **📚 PDF Processing**: Extracts and processes text from the Bhagavad Gita PDF with chapter and verse preservation
+- **💾 Local Vector Storage**: Stores text chunks and embeddings locally with no need for external vector databases
+- **🖥️ Dual Interface**: 
+  - Command line interface for quick questions and scripting
+  - Modern web interface with a responsive design for user-friendly interactions
+- **🧠 Powered by Gemini 2.0 Flash**: Leverages Google's advanced LLM for high-quality, contextually aware answers
+- **🔍 Source References**: Provides transparency by citing the specific parts of the text used to generate answers
+- **🔄 Direct Download**: Download the complete Bhagavad Gita PDF directly from the web interface
+- **💬 Contextual Conversations**: Maintains context for follow-up questions and deeper exploration
+- **🌟 "Explain More" Feature**: Request enhanced explanations with a single click or command
+
+### Key Features Explained
+
+#### PDF Download Button
+The application includes a prominently placed download button that allows users to download the complete Bhagavad Gita PDF directly from the web interface. This feature provides easy access to the source material for offline reading and reference.
+
+<details>
+<summary>How to use the download feature</summary>
+
+1. Look for the circular button with the Bhagavad Gita icon in the top-right corner of the header
+2. Hover over it to see the "Download Bhagavad Gita PDF" tooltip
+3. Click to download the complete PDF to your device
+4. After clicking, a confirmation message will appear indicating the download has started
+
+</details>
+
+## ⚡ Quick Start
+
+For those who want to get up and running quickly:
+
+```powershell
+# Clone the repository
+git clone https://github.com/yourusername/Bhagavad-Gita-Project.git
+cd Bhagavad-Gita-Project
+
+# Set up virtual environment and install dependencies
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+
+# Create .env file with your API key
+echo "GEMINI_API_KEY=your_gemini_api_key" > .env
+
+# Run the web application
+python app.py --web
+```
+
+Then open your browser to `http://localhost:5000` and start asking questions!
+
+## 🔧 Setup Instructions
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- PDF of the Bhagavad Gita in the `Data` folder
+- **Python**: 3.8 or higher
+- **Google Gemini API Key**: Get yours from [Google AI Studio](https://ai.google.dev/)
+- **Bhagavad Gita PDF**: Already included in the `Data` folder
+- **Space**: ~150MB for embeddings and model data
 
 ### Installation
 
-1. Clone this repository:
-   ```bash
-   git clone <repository-url>
+1. **Clone this repository**:
+   ```powershell
+   git clone https://github.com/yourusername/Bhagavad-Gita-Project.git
    cd Bhagavad-Gita-Project
    ```
 
-2. Create a virtual environment (recommended):
-   ```bash
-   python -m venv venv
+2. **Set up a virtual environment** (recommended):
+   ```powershell
    # Windows
+   python -m venv venv
    venv\Scripts\activate
+
    # Unix/Mac
+   python -m venv venv
    source venv/bin/activate
    ```
 
-3. Install dependencies:
-   ```bash
+3. **Install dependencies**:
+   ```powershell
    pip install -r requirements.txt
    ```
+   > ⚠️ Note: Initial installation may take a few minutes as it downloads necessary model files.
 
-4. Create a `.env` file in the project root with your Gemini API key:
+4. **Configure your API key**:
+   
+   Create a `.env` file in the project root with your Gemini API key:
    ```
    GEMINI_API_KEY=your_gemini_api_key
    ```
 
-### Usage
+## 🚀 Usage
 
-#### Command Line Interface
+### Web Interface (Recommended)
 
-Run the application in CLI mode:
-```bash
-python app.py
+1. **Start the web server**:
+   ```powershell
+   python app.py --web
+   ```
+
+2. **Access the application**:
+   - Open your browser and go to `http://localhost:5000`
+   - The interface will be automatically loaded with a welcome message
+
+3. **Using the interface**:
+   - Type your question in the input field and press Enter or click Send
+   - View the AI's response with citations from the Bhagavad Gita
+   - Click "Explain More" for a detailed explanation of complex concepts
+   - Use the download button to get the full Bhagavad Gita PDF
+
+### Command Line Interface
+
+1. **Run the application**:
+   ```powershell
+   python app.py
+   ```
+
+2. **Ask questions**:
+   - Type your questions directly into the console
+   - Receive answers with references to specific verses
+
+3. **Advanced commands**:
+   - Type `explain more` to get an expanded explanation
+   - Type `exit` or `quit` to end the session
+   - Type `help` to see all available commands
+
+## 📁 Project Structure
+
+```
+Bhagavad-Gita-Project/
+├── app.py              # Main application with CLI and web interfaces
+├── chunks.py           # Manages PDF processing and local storage
+├── llm_ai.py           # Initializes and configures the Gemini LLM
+├── requirements.txt    # Dependencies for the project
+├── .env                # Environment variables (API keys)
+├── README.md           # Project documentation
+│
+├── Data/               # Source materials
+│   └── The_Bhagavad_Gita.pdf  # Source text PDF
+│
+├── data_blocks/        # Generated data
+│   ├── index.json      # Metadata and index for chunks
+│   └── chunks/         # Individual text chunks with embeddings
+│
+├── static/             # Web assets
+│   ├── bg.png          # Background image
+│   ├── chat_bg.png     # Chat interface background
+│   ├── chat.png        # Icon for messaging
+│   ├── styles.css      # CSS styling
+│   └── script.js       # Frontend JavaScript
+│
+├── templates/          # Flask HTML templates
+│   └── index.html      # Main web interface
+│
+└── agent_logs/         # Query and system logs
 ```
 
-After receiving an answer, you can type `explain more` to get a more detailed explanation of the previous answer in about 50-60 words.
+## ⚙️ How It Works
 
-#### Web Interface
+### Architecture Overview
 
-Start the Flask web server:
-```bash
+This system implements a modern Retrieval-Augmented Generation (RAG) pipeline:
+
+1. **Document Processing**:
+   - Extracts text from the Bhagavad Gita PDF using PyPDF2
+   - Preserves chapter and verse information for accurate citations
+   - Splits text into semantically meaningful chunks using LangChain's text splitter
+
+2. **Embedding Generation**:
+   - Creates vector representations of each text chunk using HuggingFace embeddings
+   - Stores these embeddings locally with metadata in JSON format
+   - Indexes all chunks for fast retrieval
+
+3. **Query Processing**:
+   - When a user asks a question, their query is converted to an embedding
+   - The system performs similarity search to find relevant text passages
+   - Metadata about the chunks helps in providing accurate citations
+
+4. **Answer Generation**:
+   - Selected text chunks are sent to Google's Gemini 2.0 Flash LLM
+   - Custom prompts guide the model to create accurate, contextual answers
+   - Citations from the original text are preserved in responses
+
+5. **User Interface**:
+   - Offers both command-line and web interfaces
+   - Provides easy access to follow-up questions and expanded explanations
+   - Includes references to specific verses for transparency
+
+### Technical Components
+
+- **Vector Similarity**: Uses cosine similarity to find relevant text chunks
+- **Local Storage**: Implements an efficient file-based vector store without requiring databases
+- **Responsive Design**: Web interface adapts to different screen sizes
+- **Reference Tracking**: Keeps track of which text segments were used to generate answers
+
+## 📸 Screenshots
+
+<details>
+<summary>Click to view screenshots</summary>
+
+### Web Interface
+![Web Interface](https://via.placeholder.com/800x450?text=Bhagavad+Gita+Web+Interface)
+
+### Example Conversation
+![Example Conversation](https://via.placeholder.com/800x450?text=Example+Conversation)
+
+### Mobile View
+![Mobile View](https://via.placeholder.com/400x800?text=Mobile+View)
+
+> Note: Replace these placeholder images with actual screenshots of your application.
+
+</details>
+
+## 🔍 Example Questions
+
+Here are some questions you can ask the Bhagavad Gita assistant:
+
+- "What does Krishna say about dharma?"
+- "Explain the concept of karma yoga"
+- "How should one deal with grief according to the Bhagavad Gita?"
+- "What is the meaning of 'Aham Brahmasmi'?"
+- "How does the Gita describe the ideal person?"
+- "What are the three gunas mentioned in the Gita?"
+
+## 🛠️ Advanced Usage
+
+### Customizing the System
+
+You can modify the system's behavior by adjusting parameters in the following files:
+
+- **Chunk Size**: In `chunks.py`, modify `chunk_size` and `chunk_overlap` to change how text is divided
+- **Model Preferences**: In `llm_ai.py`, adjust temperature and other parameters to control answer style
+- **UI Customization**: Modify `static/styles.css` to change the appearance of the web interface
+
+### Command Line Arguments
+
+The application supports several command line arguments:
+
+```powershell
+# Run in web mode
 python app.py --web
+
+# Run with debug logging
+python app.py --debug
+
+# Reprocess the PDF (if you changed the source document)
+python app.py --reindex
+
+# View help
+python app.py --help
 ```
-Then open your browser and navigate to `http://localhost:5000`
 
-For each answer provided by the assistant, you'll see an "Explain more" button below the response. Click this button to get a more detailed explanation (approximately 50-60 words) of the previous answer.
+### Integration with Other Systems
 
-## Project Structure
+The RAG system can be integrated with other applications:
 
-- `app.py` - Main application with both CLI and web interfaces
-- `chunks.py` - Module for processing PDF and storing chunks locally
-- `llm_ai.py` - Module for initializing the Gemini LLM
-- `data_blocks/` - Directory where chunks and embeddings are stored
-- `Data/` - Contains the Bhagavad Gita PDF
-- `templates/` - HTML templates for the web interface
-- `agent_logs/` - Logs of queries and system operations
+```python
+from chunks import LocalChunkStorage
+from llm_ai import get_gemini_llm
 
-## How It Works
+# Initialize the storage
+storage = LocalChunkStorage("data_blocks")
 
-1. The system extracts text from the PDF using PyPDF2
-2. The text is split into chunks using LangChain's text splitter
-3. Embeddings are generated for each chunk using a Hugging Face model
-4. Chunks and embeddings are stored locally in JSON files
-5. When a question is asked, the system:
-   - Converts the question to an embedding
-   - Finds the most similar text chunks
-   - Sends the question and relevant chunks to Gemini
-   - Returns the AI-generated answer with context
+# Get the LLM
+llm = get_gemini_llm()
 
-## License
+# Ask a question
+response = storage.query_with_sources(llm, "What is karma yoga?")
+print(response)
+```
 
-This project is provided for educational purposes only. The Bhagavad Gita is a sacred text, and this tool is intended to help people learn and understand its teachings.
+## 🤝 Contributing
+
+Contributions are welcome! Here's how you can help:
+
+1. **Improve the UI**: Enhance the web interface with new features
+2. **Optimize Retrieval**: Work on better chunking or embedding strategies
+3. **Add Features**: Implement new capabilities like voice input/output
+4. **Fix Bugs**: Address any issues in the issue tracker
+
+Please follow the standard fork-and-pull request workflow.
+
+## 📞 Support
+
+If you encounter any issues or have questions, please:
+
+1. Check the [issue tracker](https://github.com/yourusername/Bhagavad-Gita-Project/issues)
+2. Create a new issue with details about your problem
+3. Include relevant logs from the `agent_logs` directory
+
+## 🙏 Acknowledgments
+
+- **Google Gemini AI**: For providing the powerful LLM
+- **LangChain**: For text processing tools
+- **HuggingFace**: For embedding models
+- **Flask**: For the web framework
+- **All contributors** to the open-source libraries used in this project
+
+## 📜 About the Bhagavad Gita
+
+The Bhagavad Gita, often referred to simply as the Gita, is a 700-verse Hindu scripture that is part of the Indian epic Mahabharata. It consists of a conversation between Prince Arjuna and the god Krishna, who serves as his charioteer. The Gita addresses the concepts of dharma (duty/righteousness) and yoga (the path to realization and self-discovery) among other spiritual, ethical, and philosophical topics. It is considered one of the holy scriptures for Hinduism and has been commented upon by numerous philosophers and scholars over the years.
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
