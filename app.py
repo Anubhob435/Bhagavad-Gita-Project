@@ -10,7 +10,7 @@ from langchain.chains.qa_with_sources import load_qa_with_sources_chain
 from langchain.agents import Tool, initialize_agent
 from langchain.agents.agent_types import AgentType
 from langchain.callbacks import StdOutCallbackHandler
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file, send_file
 
 # Configure logging
 log_filename = os.path.join("agent_logs", f"bhagavad_gita_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
@@ -271,6 +271,12 @@ def process_query():
     except Exception as e:
         logger.error(f"Error processing query: {e}")
         return jsonify({'error': str(e)}), 500
+
+@app.route('/download-bhagavad-gita')
+def download_bhagavad_gita():
+    """Route to download the Bhagavad Gita PDF"""
+    logger.info("User downloaded the Bhagavad Gita PDF")
+    return send_file(pdf_path, as_attachment=True)
 
 # CLI demo
 def run_cli_demo():

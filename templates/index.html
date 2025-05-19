@@ -2,20 +2,21 @@
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Bhagavad Gita Q&A</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bhagavad Gita</title>        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes">
         <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     </head>
-    <body>
-        <div class="container">
-            <header>
-                <h1>Bhagavad Gita Q&A System</h1>
+    <body>        <div class="container">
+            <header>                <a href="/download-bhagavad-gita" class="download-button" title="Download Bhagavad Gita PDF" aria-label="Download Bhagavad Gita PDF">
+                    <div class="download-icon"></div>
+                    <span class="download-tooltip">Download Bhagavad Gita PDF</span>
+                </a>
+                <h1>The Bhagavad Gita</h1>
                 <p>Ask questions about the Bhagavad Gita and get AI-powered responses</p>
             </header>
-            
-            <div class="chat-container">
-                <div id="chat-box">
+              <div class="chat-container">
+                <div id="chat-box" class="empty-chat">
                     <div class="message-container">
                         <div class="bot-message">
                             Welcome! I'm your Bhagavad Gita assistant. Ask me any question about the sacred text!
@@ -34,7 +35,7 @@
             </div>
             
             <footer>
-                <p>Bhagavad Gita Q&A System powered by Gemini AI &copy; 2025</p>
+                <p>Knowledge of Bhagavad Gita, powered by Gemini, Developed by Anubhob Dey &copy; 2025</p>
             </footer>
         </div>
         

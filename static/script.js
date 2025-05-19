@@ -3,8 +3,51 @@ document.addEventListener('DOMContentLoaded', function() {
     const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send-btn');
     const loading = document.getElementById('loading');
-      // Function to add a message to the chat
+    
+    // Download button enhancement
+    const downloadButton = document.querySelector('.download-button');
+    if (downloadButton) {
+        downloadButton.addEventListener('click', function(e) {
+            // Don't prevent default - we want the download to happen
+            
+            // Show a temporary success message
+            const successMessage = document.createElement('div');
+            successMessage.className = 'download-success';
+            successMessage.textContent = 'Download started!';
+            document.querySelector('.container').appendChild(successMessage);
+            
+            // Remove the message after 3 seconds
+            setTimeout(() => {
+                successMessage.classList.add('fade-out');
+                setTimeout(() => {
+                    document.querySelector('.container').removeChild(successMessage);
+                }, 500);
+            }, 2500);
+        });
+    }
+    
+    // Mobile viewport height fix
+    function setViewportHeight() {
+        // First we get the viewport height and multiply it by 1% to get a value for a vh unit
+        let vh = window.innerHeight * 0.01;
+        // Then we set the value in the --vh custom property to the root of the document
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+
+    // Set the height initially
+    setViewportHeight();
+
+    // Reset on resize or orientation change
+    window.addEventListener('resize', setViewportHeight);
+    window.addEventListener('orientationchange', setViewportHeight);
+    
+    // Function to add a message to the chat
     function addMessage(message, isUser = false, references = [], toolsUsed = [], isFallback = false) {
+        // Check if this is first message (after welcome) and remove empty class if it exists
+        if (chatBox.classList.contains('empty-chat')) {
+            chatBox.classList.remove('empty-chat');
+        }
+        
         const messageContainer = document.createElement('div');
         messageContainer.className = 'message-container';
         if (isUser) messageContainer.className += ' user-container';
@@ -21,8 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fallbackIndicator.textContent = 'Direct answer from Gemini (not in Bhagavad Gita)';
             messageContainer.appendChild(fallbackIndicator);
         }
-        
-        messageContainer.appendChild(messageDiv);
+          messageContainer.appendChild(messageDiv);
         
         // Add "Explain more" button and references toggle for bot messages
         if (!isUser) {
@@ -93,9 +135,15 @@ document.addEventListener('DOMContentLoaded', function() {
             
             messageContainer.appendChild(buttonContainer);
         }
+          chatBox.appendChild(messageContainer);
         
-        chatBox.appendChild(messageContainer);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        // Smooth scroll to bottom with a slight delay to ensure rendering is complete
+        setTimeout(() => {
+            chatBox.scrollTo({
+                top: chatBox.scrollHeight,
+                behavior: 'smooth'
+            });
+        }, 100);
     }
     
     // Function to send query to backend
