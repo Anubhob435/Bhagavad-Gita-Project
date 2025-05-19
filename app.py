@@ -185,8 +185,89 @@ def process_query():
     logger.info(f"Web query: {query}")
     
     try:
-        response = agent.run(query)
-        return jsonify({'response': response})
+        # Use the agent chain with callbacks to capture intermediate steps
+        from langchain.callbacks import get_openai_callback
+        from langchain.callbacks.base import BaseCallbackManager
+        from langchain.callbacks.tracers import LangChainTracer
+        
+        # Create a custom callback handler to capture tool usage and references
+        class ReferenceCapturingHandler(StdOutCallbackHandler):
+            def __init__(self):
+                super().__init__()
+                self.tool_usage = []
+                self.references = []
+                self.current_tool = None
+            
+            def on_tool_start(self, serialized, input_str, **kwargs):
+                self.current_tool = {
+                    "tool": serialized["name"],
+                    "input": input_str
+                }
+            
+            def on_tool_end(self, output, **kwargs):
+                if self.current_tool:
+                    self.current_tool["output"] = output
+                    if self.current_tool["tool"] == "RAG_QA":
+                        # Try to extract references from the output
+                        if isinstance(output, dict) and "output_text" in output:
+                            self.current_tool["answer"] = output["output_text"]
+                            # Extract sources if available
+                            if "SOURCES" in output.get("output_text", ""):
+                                sources_section = output["output_text"].split("SOURCES:", 1)
+                                if len(sources_section) > 1:
+                                    self.references = [s.strip() for s in sources_section[1].split("\n") if s.strip()]
+                        
+                    self.tool_usage.append(self.current_tool)
+                    self.current_tool = None
+        
+        # Initialize the callback handler
+        reference_handler = ReferenceCapturingHandler()
+        
+        try:
+            # Run the agent with the callback handler
+            response = agent.run(query, callbacks=[reference_handler])
+            
+            # Check if the response indicates the agent couldn't answer
+            unable_phrases = [
+                "i am unable to answer",
+                "i don't know",
+                "i cannot answer",
+                "i do not have",
+                "not available in",
+                "not found in the bhagavad gita"
+            ]
+            
+            # If the response says the agent can't answer, use direct Gemini approach
+            if any(phrase in response.lower() for phrase in unable_phrases):
+                raise ValueError("Agent indicated it cannot answer")
+            
+            # Otherwise, return the normal response
+            references = reference_handler.references
+            tools_used = [{"name": tool["tool"], "input": tool["input"]} for tool in reference_handler.tool_usage]
+            
+            return jsonify({
+                'response': response,
+                'references': references,
+                'tools_used': tools_used
+            })
+            
+        except Exception as agent_error:
+            logger.warning(f"Agent could not answer. Falling back to direct Gemini: {agent_error}")
+            
+            # Get the Gemini LLM instance
+            llm = get_gemini_llm()
+            
+            # Create direct prompt to Gemini with Bhagavad Gita context
+            direct_prompt = f"With reference to the Bhagavad Gita, please answer the following question in 60- 70 words: {query}"
+            direct_response = llm.invoke(direct_prompt)
+            
+            return jsonify({
+                'response': direct_response.content,
+                'references': [],
+                'tools_used': [{"name": "Direct Gemini", "input": "Fallback mode - using Gemini directly"}],
+                'is_fallback': True
+            })
+            
     except Exception as e:
         logger.error(f"Error processing query: {e}")
         return jsonify({'error': str(e)}), 500
@@ -233,258 +314,11 @@ def run_cli_demo():
 # Create agent for both CLI and web use
 agent = setup_rag_agent()
 
-# Create templates directory and index.html file
+# Create templates directory and ensure it exists
 def setup_templates():
-    """Set up the templates directory and HTML files"""
+    """Set up the templates directory"""
     templates_dir = os.path.join(os.path.dirname(__file__), 'templates')
     os.makedirs(templates_dir, exist_ok=True)
-    
-    index_html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Bhagavad Gita Q&A</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                line-height: 1.6;
-                margin: 0;
-                padding: 0;
-                background-color: #f5f5f5;
-                color: #333;
-            }
-            .container {
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 20px;
-            }
-            header {
-                background-color: #f8b400;
-                color: #fff;
-                padding: 1rem;
-                text-align: center;
-                border-radius: 5px 5px 0 0;
-            }
-            .chat-container {
-                background-color: white;
-                border-radius: 5px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                padding: 20px;
-                margin-top: 20px;
-            }
-            #chat-box {
-                height: 400px;
-                overflow-y: auto;
-                border: 1px solid #ddd;
-                padding: 10px;
-                margin-bottom: 10px;
-                border-radius: 5px;
-            }
-            .user-message {
-                background-color: #e6f7ff;
-                padding: 8px 12px;
-                margin: 5px 0;
-                border-radius: 15px 15px 0 15px;
-                max-width: 80%;
-                align-self: flex-end;
-                margin-left: auto;
-            }            .bot-message {
-                background-color: #f0f0f0;
-                padding: 8px 12px;
-                margin: 5px 0;
-                border-radius: 15px 15px 15px 0;
-                max-width: 80%;
-            }
-            .message-container {
-                display: flex;
-                flex-direction: column;
-                margin-bottom: 10px;
-            }
-            .user-container {
-                align-items: flex-end;
-            }
-            .explain-more-btn {
-                font-size: 12px;
-                color: #1a73e8;
-                background: none;
-                border: none;
-                text-decoration: underline;
-                cursor: pointer;
-                align-self: flex-start;
-                margin-top: 4px;
-                margin-left: 12px;
-                padding: 0;
-            }
-            .explain-more-btn:hover {
-                color: #0d47a1;
-            }
-            .form-control {
-                display: flex;
-            }
-            #user-input {
-                flex: 1;
-                padding: 10px;
-                border: 1px solid #ddd;
-                border-radius: 5px 0 0 5px;
-                font-size: 16px;
-            }
-            #send-btn {
-                padding: 10px 20px;
-                background-color: #f8b400;
-                color: white;
-                border: none;
-                border-radius: 0 5px 5px 0;
-                cursor: pointer;
-                font-size: 16px;
-            }
-            #send-btn:hover {
-                background-color: #e6a700;
-            }
-            .loading {
-                text-align: center;
-                margin: 10px 0;
-                color: #666;
-            }
-            footer {
-                text-align: center;
-                margin-top: 20px;
-                padding: 10px;
-                color: #666;
-                font-size: 12px;
-            }
-            .source {
-                font-size: 12px;
-                color: #666;
-                margin-top: 5px;
-                font-style: italic;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <header>
-                <h1>Bhagavad Gita Q&A System</h1>
-                <p>Ask questions about the Bhagavad Gita and get AI-powered responses</p>
-            </header>
-            
-            <div class="chat-container">
-                <div id="chat-box">
-                    <div class="message-container">
-                        <div class="bot-message">
-                            Welcome! I'm your Bhagavad Gita assistant. Ask me any question about the sacred text!
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="loading" class="loading" style="display: none;">
-                    Thinking...
-                </div>
-                
-                <div class="form-control">
-                    <input type="text" id="user-input" placeholder="Ask a question..." autofocus>
-                    <button id="send-btn">Send</button>
-                </div>
-            </div>
-            
-            <footer>
-                <p>Bhagavad Gita Q&A System powered by Gemini AI &copy; 2025</p>
-            </footer>
-        </div>
-        
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const chatBox = document.getElementById('chat-box');
-                const userInput = document.getElementById('user-input');
-                const sendBtn = document.getElementById('send-btn');
-                const loading = document.getElementById('loading');
-                  // Function to add a message to the chat
-                function addMessage(message, isUser = false) {
-                    const messageContainer = document.createElement('div');
-                    messageContainer.className = 'message-container';
-                    if (isUser) messageContainer.className += ' user-container';
-                    
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = isUser ? 'user-message' : 'bot-message';
-                    messageDiv.textContent = message;
-                    
-                    messageContainer.appendChild(messageDiv);
-                    
-                    // Add "Explain more" button for bot messages
-                    if (!isUser) {
-                        const explainBtn = document.createElement('button');
-                        explainBtn.className = 'explain-more-btn';
-                        explainBtn.textContent = 'Explain more';
-                        explainBtn.onclick = function() {
-                            const explainQuery = `Explain more: ${message}`;
-                            sendQuery(explainQuery);
-                        };
-                        messageContainer.appendChild(explainBtn);
-                    }
-                    
-                    chatBox.appendChild(messageContainer);
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                }
-                
-                // Function to send query to backend
-                async function sendQuery(query) {
-                    loading.style.display = 'block';
-                    
-                    try {
-                        const response = await fetch('/query', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ query: query }),
-                        });
-                        
-                        const data = await response.json();
-                        loading.style.display = 'none';
-                        
-                        if (response.ok) {
-                            addMessage(data.response);
-                        } else {
-                            addMessage('Sorry, I encountered an error: ' + (data.error || 'Unknown error'));
-                        }
-                    } catch (error) {
-                        loading.style.display = 'none';
-                        addMessage('Sorry, an error occurred while processing your request.');
-                        console.error('Error:', error);
-                    }
-                }
-                
-                // Send button click event
-                sendBtn.addEventListener('click', function() {
-                    const query = userInput.value.trim();
-                    if (query) {
-                        addMessage(query, true);
-                        userInput.value = '';
-                        sendQuery(query);
-                    }
-                });
-                
-                // Enter key press event
-                userInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        const query = userInput.value.trim();
-                        if (query) {
-                            addMessage(query, true);
-                            userInput.value = '';
-                            sendQuery(query);
-                        }
-                    }
-                });
-            });
-        </script>
-    </body>
-    </html>
-    """
-    
-    index_path = os.path.join(templates_dir, 'index.html')
-    with open(index_path, 'w', encoding='utf-8') as f:
-        f.write(index_html)
 
 # Main execution
 if __name__ == "__main__":
