@@ -312,22 +312,6 @@ Contributions are welcome! Here's how you can help:
 
 Please follow the standard fork-and-pull request workflow.
 
-## 📞 Support
-
-If you encounter any issues or have questions, please:
-
-1. Check the [issue tracker](https://github.com/yourusername/Bhagavad-Gita-Project/issues)
-2. Create a new issue with details about your problem
-3. Include relevant logs from the `agent_logs` directory
-
-## 🙏 Acknowledgments
-
-- **Google Gemini AI**: For providing the powerful LLM
-- **LangChain**: For text processing tools
-- **HuggingFace**: For embedding models
-- **Flask**: For the web framework
-- **All contributors** to the open-source libraries used in this project
-
 ## 📜 About the Bhagavad Gita
 
 The Bhagavad Gita, often referred to simply as the Gita, is a 700-verse Hindu scripture that is part of the Indian epic Mahabharata. It consists of a conversation between Prince Arjuna and the god Krishna, who serves as his charioteer. The Gita addresses the concepts of dharma (duty/righteousness) and yoga (the path to realization and self-discovery) among other spiritual, ethical, and philosophical topics. It is considered one of the holy scriptures for Hinduism and has been commented upon by numerous philosophers and scholars over the years.
