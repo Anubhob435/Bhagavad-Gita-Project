@@ -231,15 +231,7 @@ This system implements a modern Retrieval-Augmented Generation (RAG) pipeline:
 <summary>Click to view screenshots</summary>
 
 ### Web Interface
-![Web Interface](https://via.placeholder.com/800x450?text=Bhagavad+Gita+Web+Interface)
-
-### Example Conversation
-![Example Conversation](https://via.placeholder.com/800x450?text=Example+Conversation)
-
-### Mobile View
-![Mobile View](https://via.placeholder.com/400x800?text=Mobile+View)
-
-> Note: Replace these placeholder images with actual screenshots of your application.
+![Web Interface](./static/ss1.png)
 
 </details>
 
